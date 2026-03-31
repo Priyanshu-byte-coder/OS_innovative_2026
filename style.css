@@ -352,6 +352,52 @@ body{
 
 .pv-state-text{font-family:var(--mono);font-size:.7rem;font-weight:700;color:var(--tx-2);letter-spacing:.06em}
 
+.pv-gear{
+    margin-left:auto;font-size:.9rem;opacity:0;transition:opacity .3s;
+    display:inline-block;
+}
+.pv-card.st-running .pv-gear,
+.pv-card.st-boosted .pv-gear {
+    opacity:1; animation:gearSpin 2s linear infinite;
+}
+@keyframes gearSpin { 100% { transform:rotate(360deg); } }
+
+/* Micro-Animations */
+.shake-lock { animation: lockShake 0.4s ease; }
+@keyframes lockShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+.shake-card { animation: cardShake 0.4s ease; }
+@keyframes cardShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-4px); }
+    40%, 80% { transform: translateX(4px); }
+}
+
+.anim-particle {
+    position: fixed; width: 14px; height: 14px; border-radius: 50%;
+    z-index: 9999; pointer-events: none;
+    transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.anim-deny-text, .anim-accept-text {
+    position: fixed; font-weight: 800; font-size: 1.1rem;
+    pointer-events: none; z-index: 9999;
+    animation: floatUp 0.8s forwards;
+}
+.anim-deny-text { color: var(--red); text-shadow: 0 0 10px rgba(248,113,113, 0.6); }
+.anim-accept-text { color: var(--green); text-shadow: 0 0 10px rgba(52,211,153, 0.6); }
+
+@keyframes floatUp {
+    0% { transform: translateY(0) scale(0.5); opacity: 0; }
+    20% { transform: translateY(-10px) scale(1.2); opacity: 1; }
+    80% { transform: translateY(-30px) scale(1); opacity: 1; }
+    100% { transform: translateY(-40px) scale(1); opacity: 0; }
+}
+
 .pv-info{display:flex;flex-direction:column;gap:6px}
 .pv-info-row{display:flex;justify-content:space-between;align-items:center}
 .pv-info-label{font-size:.68rem;color:var(--tx-3);font-weight:500}

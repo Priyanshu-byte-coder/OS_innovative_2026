@@ -154,6 +154,7 @@ function renderProcessLane() {
             <div class="pv-state">
                 <span class="pv-state-dot st-ready" id="pvDot-${p.id}"></span>
                 <span class="pv-state-text" id="pvState-${p.id}">READY</span>
+                <span class="pv-gear" id="pvGear-${p.id}">⚙️</span>
             </div>
             <div class="pv-info">
                 <div class="pv-info-row">
@@ -301,6 +302,63 @@ function setExplanation(icon, title, text, detail) {
     body.innerHTML = html;
 
     document.getElementById('explanationBox').classList.add('active');
+}
+
+// ============================================================
+//  MICRO ANIMATIONS
+// ============================================================
+function shootParticle(pid, isDeny) {
+    const procCard = document.getElementById(`pvCard-${pid}`);
+    const lockHub = document.getElementById('rhLock');
+    if (!procCard || !lockHub) return;
+
+    const r1 = procCard.getBoundingClientRect();
+    const r2 = lockHub.getBoundingClientRect();
+
+    const startX = r1.left + r1.width / 2;
+    const startY = r1.top + r1.height / 2;
+    const endX = r2.left + r2.width / 2;
+    const endY = r2.top + r2.height / 2;
+
+    const particle = document.createElement('div');
+    particle.className = 'anim-particle';
+    particle.style.background = isDeny ? 'var(--red)' : 'var(--green)';
+    particle.style.boxShadow = `0 0 12px ${particle.style.background}`;
+    particle.style.left = startX + 'px';
+    particle.style.top = startY + 'px';
+    document.body.appendChild(particle);
+
+    // trigger animation
+    setTimeout(() => {
+        particle.style.left = endX + 'px';
+        particle.style.top = endY + 'px';
+    }, 20);
+
+    setTimeout(() => {
+        particle.remove();
+        
+        // Render text popup
+        const text = document.createElement('div');
+        text.className = isDeny ? 'anim-deny-text' : 'anim-accept-text';
+        text.textContent = isDeny ? 'DENIED!' : 'ACQUIRED!';
+        text.style.left = (endX - 35) + 'px';
+        text.style.top = (endY - 25) + 'px';
+        document.body.appendChild(text);
+
+        // Shake effects for Deny
+        if (isDeny) {
+            const hubWrap = lockHub.parentElement;
+            hubWrap.classList.remove('shake-lock');
+            void hubWrap.offsetWidth;
+            hubWrap.classList.add('shake-lock');
+
+            procCard.classList.remove('shake-card');
+            void procCard.offsetWidth;
+            procCard.classList.add('shake-card');
+        }
+
+        setTimeout(() => text.remove(), 800);
+    }, 520); // Syncs with CSS transition of 0.5s
 }
 
 // ============================================================
@@ -599,11 +657,24 @@ function nextStep() {
     sim.step++;
     const step = sim.steps[sim.step - 1];
 
+    const prevStepMap = sim.step === 1 
+        ? Object.fromEntries(processConfig.map(p => [p.id, STATES.READY]))
+        : sim.steps[sim.step - 2].stateMap;
+
     // Update process cards
     processConfig.forEach(p => {
-        const st = step.stateMap[p.id] || STATES.READY;
+        const oldSt = prevStepMap[p.id];
+        const newSt = step.stateMap[p.id] || STATES.READY;
+
+        // Check for micro-animations
+        if (oldSt !== STATES.BLOCKED && newSt === STATES.BLOCKED) {
+            shootParticle(p.id, true);
+        } else if (oldSt !== STATES.RUNNING && newSt === STATES.RUNNING && p.needsResource) {
+            shootParticle(p.id, false);
+        }
+
         const boost = step.boosts[p.id] !== undefined ? step.boosts[p.id] : null;
-        setCardState(p.id, st, boost);
+        setCardState(p.id, newSt, boost);
     });
 
     // Update resource hub
