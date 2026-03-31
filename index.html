@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="An interactive educational tool that visualizes priority inversion in OS scheduling and demonstrates how the priority inheritance protocol resolves it.">
+    <meta name="description" content="Interactive educational tool demonstrating priority inversion in OS scheduling and how priority inheritance protocol resolves it.">
     <title>Priority Inversion &amp; Inheritance Visualizer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,317 +11,179 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Background particles -->
-    <div class="bg-particles" id="bgParticles"></div>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="header-glow"></div>
-        <div class="header-content">
-            <div class="logo">
+    <!-- ===== HEADER ===== -->
+    <header id="header">
+        <div class="header-inner">
+            <div class="logo-group">
                 <div class="logo-icon">
-                    <svg viewBox="0 0 40 40" fill="none">
-                        <rect x="4" y="4" width="14" height="14" rx="3" fill="#60a5fa" opacity="0.8"/>
-                        <rect x="22" y="4" width="14" height="14" rx="3" fill="#f472b6" opacity="0.8"/>
-                        <rect x="4" y="22" width="14" height="14" rx="3" fill="#34d399" opacity="0.8"/>
-                        <rect x="22" y="22" width="14" height="14" rx="3" fill="#fbbf24" opacity="0.6"/>
-                        <path d="M11 11L29 29M29 11L11 29" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+                    <svg viewBox="0 0 32 32" fill="none">
+                        <rect x="2" y="2" width="12" height="12" rx="3" fill="#60a5fa"/>
+                        <rect x="18" y="2" width="12" height="12" rx="3" fill="#f472b6"/>
+                        <rect x="2" y="18" width="12" height="12" rx="3" fill="#34d399"/>
+                        <rect x="18" y="18" width="12" height="12" rx="3" fill="#fbbf24" opacity=".7"/>
                     </svg>
                 </div>
-                <div class="logo-text">
-                    <h1>Priority Inversion <span class="accent">&amp;</span> Inheritance Visualizer</h1>
-                    <p class="subtitle">Interactive OS Process Scheduling Simulator</p>
+                <div>
+                    <h1>Priority Inversion <span>&amp;</span> Inheritance Visualizer</h1>
+                    <p class="tagline">Interactive OS Process Scheduling Simulator</p>
                 </div>
             </div>
-            <div class="header-badge">
-                <span class="badge-dot"></span>
-                OS Scheduling Lab
-            </div>
+            <div class="header-pill"><span class="live-dot"></span>OS Scheduling Lab</div>
         </div>
     </header>
 
-    <main class="main-container">
-        <!-- Control Panel -->
-        <section class="control-panel" id="controlPanel">
-            <div class="controls-row">
-                <button class="btn btn-start" id="btnStart" onclick="startSimulation()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="5,3 19,12 5,21"/>
-                    </svg>
-                    Start Simulation
-                </button>
-                <button class="btn btn-next" id="btnNext" onclick="nextStep()" disabled>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="9,18 15,12 9,6"/>
-                    </svg>
-                    Next Step
-                </button>
-                <button class="btn btn-auto" id="btnAuto" onclick="toggleAutoPlay()" disabled>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="5,3 19,12 5,21"/>
-                        <line x1="19" y1="3" x2="19" y2="21"/>
-                    </svg>
-                    Auto Play
-                </button>
-                <button class="btn btn-reset" id="btnReset" onclick="resetSimulation()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                        <path d="M3 3v5h5"/>
-                    </svg>
-                    Reset
+    <!-- ===== MAIN LAYOUT ===== -->
+    <div id="app">
+
+        <!-- LEFT: Config Panel -->
+        <aside id="configPanel">
+            <div class="panel-section">
+                <h2 class="panel-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    Process Configuration
+                </h2>
+                <div id="processListConfig"></div>
+                <button class="btn btn-add" id="btnAddProcess" onclick="addProcess()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add Process
                 </button>
             </div>
-            <div class="toggle-row">
-                <div class="toggle-container" id="inheritanceToggle" onclick="toggleInheritance()">
-                    <div class="toggle-track">
-                        <div class="toggle-thumb"></div>
-                    </div>
+
+            <div class="panel-section">
+                <h2 class="panel-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Resource Assignment
+                </h2>
+                <p class="panel-hint">Select which processes need the shared resource lock.</p>
+                <div id="resourceAssignment"></div>
+            </div>
+
+            <div class="panel-section">
+                <h2 class="panel-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+                    Options
+                </h2>
+                <div class="toggle-row" id="inheritanceToggle" onclick="toggleInheritance()">
+                    <div class="toggle-track"><div class="toggle-thumb"></div></div>
                     <span class="toggle-label">Priority Inheritance</span>
-                    <span class="toggle-status" id="toggleStatus">OFF</span>
+                    <span class="toggle-badge off" id="toggleBadge">OFF</span>
                 </div>
-                <div class="speed-control">
-                    <label>Speed:</label>
-                    <input type="range" min="1" max="5" value="3" id="speedSlider" oninput="updateSpeed(this.value)">
-                    <span id="speedLabel">1x</span>
+                <div class="speed-row">
+                    <label>Simulation Speed</label>
+                    <div class="speed-slider-group">
+                        <input type="range" min="1" max="5" value="3" id="speedSlider" oninput="updateSpeed(this.value)">
+                        <span id="speedLabel" class="speed-val">1×</span>
+                    </div>
                 </div>
             </div>
-        </section>
+        </aside>
 
-        <!-- Main Visualization Area -->
-        <div class="viz-grid">
-            <!-- Process Cards -->
-            <section class="processes-section">
-                <h2 class="section-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-                        <rect x="2" y="3" width="20" height="18" rx="2"/>
-                        <path d="M8 7h8M8 12h8M8 17h4"/>
-                    </svg>
-                    Processes
+        <!-- CENTER: Visualization -->
+        <main id="vizArea">
+
+            <!-- Control Bar -->
+            <div class="control-bar">
+                <div class="control-btns">
+                    <button class="btn btn-primary" id="btnStart" onclick="startSimulation()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+                        Start
+                    </button>
+                    <button class="btn btn-accent" id="btnNext" onclick="nextStep()" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg>
+                        Next Step
+                    </button>
+                    <button class="btn btn-cyan" id="btnAuto" onclick="toggleAutoPlay()" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+                        Auto Play
+                    </button>
+                    <button class="btn btn-ghost" id="btnReset" onclick="resetSimulation()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                        Reset
+                    </button>
+                </div>
+                <div class="step-indicator">
+                    Step <span id="curStep" class="step-num">0</span> / <span id="totalSteps" class="step-den">0</span>
+                </div>
+            </div>
+
+            <!-- Process + Resource Visual -->
+            <div class="viz-main">
+                <!-- Process swim-lane cards -->
+                <div class="process-lane" id="processLane"></div>
+
+                <!-- Central Resource Lock -->
+                <div class="resource-hub" id="resourceHub">
+                    <div class="rh-lock" id="rhLock">
+                        <svg id="lockSvg" viewBox="0 0 64 80" width="56" height="70">
+                            <path id="shackle" d="M16,36 V24 A16,16 0 0 1 48,24 V36" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+                            <rect x="8" y="36" width="48" height="34" rx="6" fill="currentColor" opacity=".18" stroke="currentColor" stroke-width="2.5"/>
+                            <circle cx="32" cy="52" r="5" fill="currentColor"/>
+                            <line x1="32" y1="57" x2="32" y2="63" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="rh-status" id="rhStatus">UNLOCKED</div>
+                    <div class="rh-owner" id="rhOwner">—</div>
+                    <div class="rh-queue-wrap">
+                        <span class="rh-queue-label">Wait Queue</span>
+                        <div class="rh-queue" id="rhQueue">empty</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gantt Timeline -->
+            <div class="gantt-section">
+                <h2 class="section-label">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="12" x2="22" y2="12"/><polyline points="18,8 22,12 18,16"/></svg>
+                    Execution Timeline
                 </h2>
-                <div class="process-cards">
-                    <!-- P1 - High Priority -->
-                    <div class="process-card" id="processP1" data-priority="high">
-                        <div class="process-header">
-                            <div class="process-id">P1</div>
-                            <div class="priority-badge priority-high">HIGH</div>
-                        </div>
-                        <div class="process-body">
-                            <div class="state-indicator">
-                                <div class="state-dot" id="stateP1Dot"></div>
-                                <span class="state-text" id="stateP1">READY</span>
-                            </div>
-                            <div class="process-info">
-                                <div class="info-item">
-                                    <span class="info-label">Priority</span>
-                                    <span class="info-value" id="priorityP1">3 (Highest)</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Needs</span>
-                                    <span class="info-value">Resource Lock</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="process-pulse" id="pulseP1"></div>
-                    </div>
-
-                    <!-- P2 - Medium Priority -->
-                    <div class="process-card" id="processP2" data-priority="medium">
-                        <div class="process-header">
-                            <div class="process-id">P2</div>
-                            <div class="priority-badge priority-medium">MEDIUM</div>
-                        </div>
-                        <div class="process-body">
-                            <div class="state-indicator">
-                                <div class="state-dot" id="stateP2Dot"></div>
-                                <span class="state-text" id="stateP2">READY</span>
-                            </div>
-                            <div class="process-info">
-                                <div class="info-item">
-                                    <span class="info-label">Priority</span>
-                                    <span class="info-value" id="priorityP2">2</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Needs</span>
-                                    <span class="info-value">CPU Only</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="process-pulse" id="pulseP2"></div>
-                    </div>
-
-                    <!-- P3 - Low Priority -->
-                    <div class="process-card" id="processP3" data-priority="low">
-                        <div class="process-header">
-                            <div class="process-id">P3</div>
-                            <div class="priority-badge priority-low">LOW</div>
-                        </div>
-                        <div class="process-body">
-                            <div class="state-indicator">
-                                <div class="state-dot" id="stateP3Dot"></div>
-                                <span class="state-text" id="stateP3">READY</span>
-                            </div>
-                            <div class="process-info">
-                                <div class="info-item">
-                                    <span class="info-label">Priority</span>
-                                    <span class="info-value" id="priorityP3">1 (Lowest)</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Needs</span>
-                                    <span class="info-value">Resource Lock</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="process-pulse" id="pulseP3"></div>
-                    </div>
+                <div class="gantt-chart" id="ganttChart">
+                    <div class="gantt-labels" id="ganttLabels"></div>
+                    <div class="gantt-tracks" id="ganttTracks"></div>
                 </div>
-            </section>
+                <div class="gantt-legend">
+                    <span class="gl-item"><i class="gl-c gl-running"></i>Running</span>
+                    <span class="gl-item"><i class="gl-c gl-ready"></i>Ready</span>
+                    <span class="gl-item"><i class="gl-c gl-blocked"></i>Blocked</span>
+                    <span class="gl-item"><i class="gl-c gl-done"></i>Done</span>
+                    <span class="gl-item"><i class="gl-c gl-boosted"></i>Boosted</span>
+                </div>
+            </div>
 
-            <!-- Resource Lock -->
-            <section class="resource-section">
-                <h2 class="section-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-                        <rect x="3" y="11" width="18" height="11" rx="2"/>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                    </svg>
-                    Shared Resource
+            <!-- Explanation -->
+            <div class="explanation-box" id="explanationBox">
+                <div class="exp-icon" id="expIcon">💡</div>
+                <div class="exp-body">
+                    <h3 id="expTitle">Welcome</h3>
+                    <p id="expText">Configure your processes on the left, then click <strong>Start</strong> to begin the simulation. Toggle <strong>Priority Inheritance</strong> to compare behavior.</p>
+                </div>
+            </div>
+
+            <!-- Comparison (shown after simulation completes) -->
+            <div class="comparison-panel" id="comparisonPanel" style="display:none">
+                <h2 class="section-label">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                    Comparison: With vs Without Priority Inheritance
                 </h2>
-                <div class="resource-card" id="resourceCard">
-                    <div class="lock-visual" id="lockVisual">
-                        <div class="lock-body">
-                            <svg viewBox="0 0 64 64" width="64" height="64" id="lockIcon">
-                                <rect x="12" y="30" width="40" height="28" rx="4" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="2"/>
-                                <path id="lockShackle" d="M20 30V22a12 12 0 0 1 24 0v8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-                                <circle cx="32" cy="44" r="4" fill="currentColor"/>
-                                <line x1="32" y1="48" x2="32" y2="52" stroke="currentColor" stroke-width="2"/>
-                            </svg>
-                        </div>
-                        <div class="lock-label" id="lockLabel">UNLOCKED</div>
-                        <div class="lock-owner" id="lockOwner">No owner</div>
+                <div class="comp-grid">
+                    <div class="comp-card comp-bad">
+                        <h3>❌ Without Inheritance</h3>
+                        <div class="comp-timeline" id="compWithout"></div>
+                        <div class="comp-stats" id="compStatsWithout"></div>
                     </div>
-                    <div class="resource-queue" id="resourceQueue">
-                        <span class="queue-label">Waiting Queue:</span>
-                        <div class="queue-items" id="queueItems">Empty</div>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <!-- Connection Lines (animated arrows between processes and resource) -->
-        <div class="connection-overlay" id="connectionOverlay"></div>
-
-        <!-- Timeline Section -->
-        <section class="timeline-section">
-            <h2 class="section-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-                    <line x1="2" y1="12" x2="22" y2="12"/>
-                    <polyline points="18,8 22,12 18,16"/>
-                </svg>
-                Execution Timeline
-            </h2>
-            <div class="timeline-wrapper">
-                <div class="timeline-labels">
-                    <div class="timeline-label label-p1">P1 <span>(High)</span></div>
-                    <div class="timeline-label label-p2">P2 <span>(Med)</span></div>
-                    <div class="timeline-label label-p3">P3 <span>(Low)</span></div>
-                </div>
-                <div class="timeline-tracks" id="timelineTracks">
-                    <div class="timeline-track" id="trackP1"></div>
-                    <div class="timeline-track" id="trackP2"></div>
-                    <div class="timeline-track" id="trackP3"></div>
-                    <!-- Step markers -->
-                    <div class="timeline-steps" id="timelineSteps"></div>
-                </div>
-            </div>
-            <div class="timeline-legend">
-                <div class="legend-item"><div class="legend-color legend-running"></div>Running</div>
-                <div class="legend-item"><div class="legend-color legend-ready"></div>Ready</div>
-                <div class="legend-item"><div class="legend-color legend-blocked"></div>Blocked</div>
-                <div class="legend-item"><div class="legend-color legend-completed"></div>Completed</div>
-                <div class="legend-item"><div class="legend-color legend-boosted"></div>Priority Boosted</div>
-            </div>
-        </section>
-
-        <!-- Explanation Panel -->
-        <section class="explanation-section">
-            <h2 class="section-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="12" y1="16" x2="12" y2="12"/>
-                    <line x1="12" y1="8" x2="12.01" y2="8"/>
-                </svg>
-                Step Explanation
-            </h2>
-            <div class="explanation-card" id="explanationCard">
-                <div class="step-counter">
-                    <span class="step-number" id="stepNumber">0</span>
-                    <span class="step-total" id="stepTotal">/ 6</span>
-                </div>
-                <div class="explanation-content">
-                    <h3 class="explanation-title" id="explanationTitle">Welcome</h3>
-                    <p class="explanation-text" id="explanationText">
-                        Click <strong>"Start Simulation"</strong> to begin the visualization. 
-                        Toggle <strong>Priority Inheritance</strong> to see how the OS resolves priority inversion.
-                    </p>
-                    <div class="explanation-detail" id="explanationDetail">
-                        <div class="detail-icon">💡</div>
-                        <p>Priority inversion occurs when a high-priority process is indirectly preempted by a lower-priority process, causing unexpected delays.</p>
+                    <div class="comp-card comp-good">
+                        <h3>✅ With Inheritance</h3>
+                        <div class="comp-timeline" id="compWith"></div>
+                        <div class="comp-stats" id="compStatsWith"></div>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Comparison Section -->
-        <section class="comparison-section" id="comparisonSection" style="display: none;">
-            <h2 class="section-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-                    <path d="M18 20V10M12 20V4M6 20v-6"/>
-                </svg>
-                Comparison: With vs Without Priority Inheritance
-            </h2>
-            <div class="comparison-grid">
-                <div class="comparison-card comparison-without">
-                    <h3>❌ Without Priority Inheritance</h3>
-                    <div class="comparison-timeline" id="compTimelineWithout"></div>
-                    <div class="comparison-stats">
-                        <div class="stat">
-                            <span class="stat-label">P1 Wait Time</span>
-                            <span class="stat-value stat-bad" id="waitWithout">4 steps</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-label">Execution Order</span>
-                            <span class="stat-value" id="orderWithout">P3 → P2 → P3 → P1</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-label">Priority Violation</span>
-                            <span class="stat-value stat-bad">Yes ⚠️</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="comparison-card comparison-with">
-                    <h3>✅ With Priority Inheritance</h3>
-                    <div class="comparison-timeline" id="compTimelineWith"></div>
-                    <div class="comparison-stats">
-                        <div class="stat">
-                            <span class="stat-label">P1 Wait Time</span>
-                            <span class="stat-value stat-good" id="waitWith">2 steps</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-label">Execution Order</span>
-                            <span class="stat-value" id="orderWith">P3 → P3(↑) → P1 → P2</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-label">Priority Violation</span>
-                            <span class="stat-value stat-good">No ✅</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+        </main>
+    </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <p>Priority Inversion &amp; Inheritance Visualizer — OS Scheduling Educational Tool</p>
+    <footer id="footer">
+        <p>Priority Inversion &amp; Inheritance Visualizer — OS Process Scheduling Educational Tool</p>
     </footer>
 
     <script src="script.js"></script>
