@@ -33,51 +33,13 @@
         </div>
     </header>
 
+    <div class="page-actions">
+        <a href="settings.html" class="btn btn-ghost">⚙️ Settings</a>
+        <a href="index.html" class="btn btn-ghost">🏠 Simulator</a>
+    </div>
+
     <!-- ===== MAIN LAYOUT ===== -->
-    <div id="app">
-
-        <!-- LEFT: Config Panel -->
-        <aside id="configPanel">
-            <div class="panel-section">
-                <h2 class="panel-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                    Process Configuration
-                </h2>
-                <div id="processListConfig"></div>
-                <button class="btn btn-add" id="btnAddProcess" onclick="addProcess()">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Add Process
-                </button>
-            </div>
-
-            <div class="panel-section">
-                <h2 class="panel-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    Resource Assignment
-                </h2>
-                <p class="panel-hint">Select which processes need the shared resource lock.</p>
-                <div id="resourceAssignment"></div>
-            </div>
-
-            <div class="panel-section">
-                <h2 class="panel-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
-                    Options
-                </h2>
-                <div class="toggle-row" id="inheritanceToggle" onclick="toggleInheritance()">
-                    <div class="toggle-track"><div class="toggle-thumb"></div></div>
-                    <span class="toggle-label">Priority Inheritance</span>
-                    <span class="toggle-badge off" id="toggleBadge">OFF</span>
-                </div>
-                <div class="speed-row">
-                    <label>Simulation Speed</label>
-                    <div class="speed-slider-group">
-                        <input type="range" min="1" max="5" value="3" id="speedSlider" oninput="updateSpeed(this.value)">
-                        <span id="speedLabel" class="speed-val">1×</span>
-                    </div>
-                </div>
-            </div>
-        </aside>
+    <div id="app" class="no-sidebar">
 
         <!-- CENTER: Visualization -->
         <main id="vizArea">
