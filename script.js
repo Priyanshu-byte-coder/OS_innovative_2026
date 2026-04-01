@@ -40,13 +40,115 @@ let sim = {
     completed: false,
 };
 
+function getEl(id) {
+    return document.getElementById(id);
+}
+
+function saveState() {
+    const data = {
+        processConfig,
+        nextProcId,
+        sim: {
+            speed: sim.speed,
+            inheritanceEnabled: sim.inheritanceEnabled,
+        }
+    };
+    localStorage.setItem('piState', JSON.stringify(data));
+}
+
+function loadState() {
+    try {
+        const saved = localStorage.getItem('piState');
+        if (!saved) return false;
+        const data = JSON.parse(saved);
+        if (!data || !Array.isArray(data.processConfig)) return false;
+        processConfig = data.processConfig;
+        nextProcId = data.nextProcId || (processConfig.length ? Math.max(...processConfig.map(p => p.id)) + 1 : 1);
+        sim.speed = data.sim?.speed || sim.speed;
+        sim.inheritanceEnabled = data.sim?.inheritanceEnabled || false;
+        return true;
+    } catch (e) {
+        console.warn('Failed to load saved state:', e);
+        return false;
+    }
+}
+
+function syncUIFromState() {
+    const toggleRow = getEl('inheritanceToggle');
+    const badge = getEl('toggleBadge');
+    if (toggleRow && badge) {
+        if (sim.inheritanceEnabled) {
+            toggleRow.classList.add('active');
+            badge.textContent = 'ON';
+            badge.classList.remove('off');
+            badge.classList.add('on');
+        } else {
+            toggleRow.classList.remove('active');
+            badge.textContent = 'OFF';
+            badge.classList.remove('on');
+            badge.classList.add('off');
+        }
+    }
+    const speedSlider = getEl('speedSlider');
+    const speedLabel = getEl('speedLabel');
+    if (speedSlider) speedSlider.value = sim.speed;
+    if (speedLabel) {
+        const labels = ['0.5×', '0.75×', '1×', '1.5×', '2×'];
+        speedLabel.textContent = labels[sim.speed - 1] || '1×';
+    }
+}
+
 // ============================================================
 //  INITIALIZATION — default three processes
 // ============================================================
 function init() {
-    addProcess(3, true);   // P1 high, needs resource
-    addProcess(2, false);  // P2 med, CPU only
-    addProcess(1, true);   // P3 low, needs resource
+    if (!loadState()) {
+        processConfig = [];
+        nextProcId = 1;
+        sim.speed = 3;
+        sim.inheritanceEnabled = false;
+        addProcess(3, true);   // P1 high, needs resource
+        addProcess(2, false);  // P2 med, CPU only
+        addProcess(1, true);   // P3 low, needs resource
+    }
+    syncUIFromState();
+    renderAll();
+}
+
+function setDefaultExample() {
+    processConfig = [];
+    nextProcId = 1;
+    sim.inheritanceEnabled = false;
+    sim.speed = 3;
+    processConfig.push({ id: 1, name: 'P1', priority: 3, needsResource: true, color: PROCESS_COLORS[0] });
+    processConfig.push({ id: 2, name: 'P2', priority: 2, needsResource: false, color: PROCESS_COLORS[1] });
+    processConfig.push({ id: 3, name: 'P3', priority: 1, needsResource: true, color: PROCESS_COLORS[2] });
+    nextProcId = 4;
+    syncUIFromState();
+    saveState();
+    renderAll();
+}
+
+function setBulkExample(total) {
+    processConfig = [];
+    nextProcId = 1;
+    sim.inheritanceEnabled = false;
+    sim.speed = 3;
+    for (let i = 1; i <= total; i++) {
+        const priority = Math.max(1, 5 - (i % 5));
+        const needsResource = i % 3 !== 0; // 2/3 processes need resource
+        const color = PROCESS_COLORS[(nextProcId - 1) % PROCESS_COLORS.length];
+        processConfig.push({
+            id: nextProcId,
+            name: `P${nextProcId}`,
+            priority,
+            needsResource,
+            color,
+        });
+        nextProcId++;
+    }
+    syncUIFromState();
+    saveState();
     renderAll();
 }
 
@@ -63,23 +165,31 @@ function addProcess(priority, needsResource) {
         needsResource: needsResource !== undefined ? needsResource : false,
         color,
     });
+    saveState();
     renderAll();
 }
 
 function removeProcess(id) {
     if (processConfig.length <= 2) return;          // need at least 2
     processConfig = processConfig.filter(p => p.id !== id);
+    saveState();
     renderAll();
 }
 
 function updatePriority(id, val) {
     const p = processConfig.find(x => x.id === id);
-    if (p) p.priority = Math.max(1, parseInt(val) || 1);
+    if (p) {
+        p.priority = Math.max(1, parseInt(val) || 1);
+        saveState();
+    }
 }
 
 function toggleResource(id) {
     const p = processConfig.find(x => x.id === id);
-    if (p) p.needsResource = !p.needsResource;
+    if (p) {
+        p.needsResource = !p.needsResource;
+        saveState();
+    }
     renderResourceAssignment();
 }
 
@@ -96,7 +206,8 @@ function renderAll() {
 }
 
 function renderProcessList() {
-    const c = document.getElementById('processListConfig');
+    const c = getEl('processListConfig');
+    if (!c) return;
     c.innerHTML = '';
     processConfig.forEach(p => {
         const div = document.createElement('div');
@@ -118,7 +229,8 @@ function renderProcessList() {
 }
 
 function renderResourceAssignment() {
-    const c = document.getElementById('resourceAssignment');
+    const c = getEl('resourceAssignment');
+    if (!c) return;
     c.innerHTML = '';
     processConfig.forEach(p => {
         const div = document.createElement('div');
@@ -136,7 +248,8 @@ function renderResourceAssignment() {
 //  RENDER PROCESS LANE (center cards)
 // ============================================================
 function renderProcessLane() {
-    const lane = document.getElementById('processLane');
+    const lane = getEl('processLane');
+    if (!lane) return;
     lane.innerHTML = '';
     processConfig.forEach(p => {
         const card = document.createElement('div');
@@ -175,7 +288,8 @@ function renderProcessLane() {
 //  RENDER GANTT
 // ============================================================
 function renderGanttLabels() {
-    const c = document.getElementById('ganttLabels');
+    const c = getEl('ganttLabels');
+    if (!c) return;
     c.innerHTML = '';
     processConfig.forEach(p => {
         const label = document.createElement('div');
@@ -187,7 +301,8 @@ function renderGanttLabels() {
 }
 
 function clearGanttTracks() {
-    const c = document.getElementById('ganttTracks');
+    const c = getEl('ganttTracks');
+    if (!c) return;
     c.innerHTML = '';
     processConfig.forEach(p => {
         const track = document.createElement('div');
@@ -221,11 +336,12 @@ function addGanttColumn(stepNum, stateMap) {
 //  RESOURCE HUB UI
 // ============================================================
 function updateResourceHub(locked, owner, queue) {
-    const hub    = document.getElementById('resourceHub');
-    const status = document.getElementById('rhStatus');
-    const ownerE = document.getElementById('rhOwner');
-    const queueE = document.getElementById('rhQueue');
-    const shackle = document.getElementById('shackle');
+    const hub    = getEl('resourceHub');
+    const status = getEl('rhStatus');
+    const ownerE = getEl('rhOwner');
+    const queueE = getEl('rhQueue');
+    const shackle = getEl('shackle');
+    if (!hub || !status || !ownerE || !queueE || !shackle) return;
 
     hub.classList.remove('locked', 'unlocked');
     if (locked) {
@@ -290,18 +406,22 @@ function setCardState(pid, state, boostPri) {
 //  EXPLANATION UI
 // ============================================================
 function setExplanation(icon, title, text, detail) {
-    document.getElementById('expIcon').textContent = icon;
-    document.getElementById('expTitle').textContent = title;
-    const body = document.getElementById('expText');
+    const expIcon = getEl('expIcon');
+    const expTitle = getEl('expTitle');
+    const body = getEl('expText');
+    const box = getEl('explanationBox');
+    if (!expIcon || !expTitle || !body || !box) return;
 
-    // Build HTML
+    expIcon.textContent = icon;
+    expTitle.textContent = title;
+
     let html = text;
     if (detail) {
         html += `<div class="exp-detail">${detail}</div>`;
     }
     body.innerHTML = html;
 
-    document.getElementById('explanationBox').classList.add('active');
+    box.classList.add('active');
 }
 
 // ============================================================
@@ -700,14 +820,19 @@ function finishSimulation() {
     sim.completed = true;
     if (sim.autoPlay) toggleAutoPlay();
 
-    document.getElementById('btnNext').disabled = true;
-    document.getElementById('btnAuto').disabled = true;
-    document.getElementById('btnStart').disabled = false;
+    const btnNext = getEl('btnNext');
+    const btnAuto = getEl('btnAuto');
+    const btnStart = getEl('btnStart');
+    if (btnNext) btnNext.disabled = true;
+    if (btnAuto) btnAuto.disabled = true;
+    if (btnStart) btnStart.disabled = false;
 
     buildComparison();
-    document.getElementById('comparisonPanel').style.display = 'block';
+    const comparisonPanel = getEl('comparisonPanel');
+    if (comparisonPanel) comparisonPanel.style.display = 'block';
     setTimeout(() => {
-        document.getElementById('comparisonPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const panel = getEl('comparisonPanel');
+        if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 250);
 }
 
@@ -720,12 +845,18 @@ function resetSimulation() {
 
     renderAll();
 
-    document.getElementById('btnStart').disabled = false;
-    document.getElementById('btnNext').disabled = true;
-    document.getElementById('btnAuto').disabled = true;
-    document.getElementById('curStep').textContent = '0';
-    document.getElementById('totalSteps').textContent = '0';
-    document.getElementById('comparisonPanel').style.display = 'none';
+    const btnStart = getEl('btnStart');
+    const btnNext = getEl('btnNext');
+    const btnAuto = getEl('btnAuto');
+    if (btnStart) btnStart.disabled = false;
+    if (btnNext) btnNext.disabled = true;
+    if (btnAuto) btnAuto.disabled = true;
+    const curStep = getEl('curStep');
+    const totalSteps = getEl('totalSteps');
+    if (curStep) curStep.textContent = '0';
+    if (totalSteps) totalSteps.textContent = '0';
+    const comparisonPanel = getEl('comparisonPanel');
+    if (comparisonPanel) comparisonPanel.style.display = 'none';
 
     setExplanation(
         '💡',
@@ -733,23 +864,27 @@ function resetSimulation() {
         `Configure your processes on the left, then click <strong>Start</strong> to begin the simulation. Toggle <strong>Priority Inheritance</strong> to compare behavior.`,
         null
     );
-    document.getElementById('explanationBox').classList.remove('active');
+    const explanationBox = getEl('explanationBox');
+    if (explanationBox) explanationBox.classList.remove('active');
 }
 
 function toggleInheritance() {
     sim.inheritanceEnabled = !sim.inheritanceEnabled;
-    const row = document.getElementById('inheritanceToggle');
-    const badge = document.getElementById('toggleBadge');
-    if (sim.inheritanceEnabled) {
-        row.classList.add('active');
-        badge.textContent = 'ON';
-        badge.classList.remove('off');
-        badge.classList.add('on');
-    } else {
-        row.classList.remove('active');
-        badge.textContent = 'OFF';
-        badge.classList.remove('on');
-        badge.classList.add('off');
+    saveState();
+    const row = getEl('inheritanceToggle');
+    const badge = getEl('toggleBadge');
+    if (row && badge) {
+        if (sim.inheritanceEnabled) {
+            row.classList.add('active');
+            badge.textContent = 'ON';
+            badge.classList.remove('off');
+            badge.classList.add('on');
+        } else {
+            row.classList.remove('active');
+            badge.textContent = 'OFF';
+            badge.classList.remove('on');
+            badge.classList.add('off');
+        }
     }
     // Reset if mid-simulation
     if (sim.running || sim.completed) resetSimulation();
@@ -776,8 +911,10 @@ function toggleAutoPlay() {
 
 function updateSpeed(val) {
     sim.speed = parseInt(val);
+    saveState();
     const labels = ['0.5×', '0.75×', '1×', '1.5×', '2×'];
-    document.getElementById('speedLabel').textContent = labels[val - 1] || '1×';
+    const speedLabel = getEl('speedLabel');
+    if (speedLabel) speedLabel.textContent = labels[val - 1] || '1×';
     if (sim.autoPlay) {
         clearInterval(sim.autoTimer);
         const delays = [2500, 2000, 1500, 1000, 600];
