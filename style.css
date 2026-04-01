@@ -112,6 +112,17 @@ body{
     gap:0;
     min-height:calc(100vh - 70px);
 }
+#app.no-sidebar {
+    grid-template-columns:1fr;
+}
+
+.page-actions {
+    max-width:1600px;margin:20px auto 0;padding:0 28px;display:flex;gap:10px;
+}
+
+.page-actions .btn {
+    padding:8px 12px;border-radius:8px;font-size:0.86rem;
+}
 
 /* ---- Sidebar ---- */
 #configPanel{
@@ -279,8 +290,12 @@ body{
 .btn-cyan{background:rgba(34,211,238,.15);color:var(--cyan);border-color:rgba(34,211,238,.3)}
 .btn-cyan:hover:not(:disabled){background:rgba(34,211,238,.25)}
 .btn-cyan.playing{background:rgba(248,113,113,.15);color:var(--red);border-color:rgba(248,113,113,.3)}
+.btn-purple{background:rgba(167,139,250,.2);color:var(--purple);border-color:rgba(167,139,250,.35)}
+.btn-purple:hover:not(:disabled){background:rgba(167,139,250,.3)}
 .btn-ghost{background:rgba(255,255,255,.04);color:var(--tx-2);border-color:var(--border)}
 .btn-ghost:hover:not(:disabled){background:rgba(255,255,255,.08);color:var(--tx-1)}
+
+.settings-action-group{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;}
 
 .step-indicator{
     font-family:var(--mono);font-size:.82rem;color:var(--tx-3);font-weight:500;
